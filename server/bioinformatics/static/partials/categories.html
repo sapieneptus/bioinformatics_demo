@@ -1,0 +1,57 @@
+<div id="new-category" ng-show="catCtrl.new_cat===true">
+	<h3 class="text text-center">New Category</h3>
+	<form class="form-horizontal">
+	  <div class="form-group">
+	    <label for="category-name" class="col-sm-2 control-label">Category Name</label>
+	    <div class="col-sm-10">
+	      <input type="text" class="form-control" id="category-name" name="category-name" placeholder="Name*" required>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label for="category-description" class="col-sm-2 control-label">Category Description</label>
+	    <div class="col-sm-10">
+	      <textarea rows="5" type="text" class="form-control" id="category-name" name="category-description" placeholder="Description...*" required></textarea>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	  	<label for="workflow-options" class="col-sm-2 control-label">Choose 0 or more workflows:</label>
+	    <div class="col-sm-10">
+	      <div class="checkbox" id="workflow-options" ng-repeat="workflow in catCtrl.workflows">
+	        <label>
+	          <input type="checkbox" value="{{workflow.id}}"> {{workflow.name}}
+	        </label>
+	      </div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" class="btn btn-default">Create</button>
+	    </div>
+	  </div>
+	</form>
+	<hr>
+</div>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default" ng-repeat="cat in catCtrl.categories">
+    <div class="panel-heading" role="tab" id="{{'heading-' + cat.id }}">
+      <h4 class="panel-title">
+        <a class="collapsed" target="_self" data-toggle="collapse" data-parent="#accordion" href="{{'#collapse-' + cat.id }}" aria-expanded="false" aria-controls="{{'collapse-' + cat.id }}">
+          {{cat.name}}
+        </a>
+        <i ng-click="catCtrl.delete(cat.id)" class="glyphicon glyphicon-remove pull-right"></i>
+        <i ng-hide="catCtrl.editing == cat.id" ng-click="catCtrl.edit(cat.id)" class="glyphicon glyphicon-pencil pull-right"></i>
+        <i ng-show="catCtrl.editing == cat.id" ng-click="catCtrl.save(cat.id)" class="glyphicon glyphicon-ok pull-right"></i>
+      </h4>
+    </div>
+    <div id="{{'collapse-' + cat.id }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="{{'heading-' + cat.id }}">
+      <div class="panel-body">
+      	<p>
+        	{{cat.description}}
+    	</p>
+        <small class="muted">Created on {{cat.created_on | date:medium}}</small>
+        <br>
+        <small class="muted">last modified {{cat.last_modified | date:'MM/dd/yyyy @ h:mma'}}</small>
+      </div>
+    </div>
+  </div>
+</div>

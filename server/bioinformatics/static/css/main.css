@@ -1,0 +1,45 @@
+body {
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: 14px;
+	line-height: 1.42857143;
+	background-color: #3d3d3d;
+}
+
+#content {
+	padding: 20px 60px;
+}
+
+.navbar label {
+	color: #9d9d9d;
+}
+
+#main-container {
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	border-color: #eee;
+	border-width: 1px;
+	background-color: #e9eaee;
+	padding: 20px;
+}
+
+.category-cell {
+	display: block;
+	list-style-type: none;
+}
+
+p.lead.text-center {
+	color:#eee;
+}
+
+.muted {
+	font-weight: 300;
+}
+
+i.glyphicon {
+	padding-left:15px;
+}
+
+hr {
+	color: #000;
+}
