@@ -77,6 +77,13 @@ this.
  I'd try to factor out as much of the CategoryController logic as possible, possibly to some common object from 
  which WorkflowController and CategoryController can both pull methods/variables. 
  
+ Workflows currently can be added to a category during creation and can be removed individually during editing,
+ but can not be added individually during editing. My first pass approach would be to get a delta array of 
+ the workflows not present on a given category and let the user add them to a category via dropdown menu. A
+ second pass might involve a search filter (in case there are a lot of workflows / serverside search). I would
+ also allow the user to create a brand-new workflow right from the category edit dialog, since workflows
+ must be attached to at least one category anyway. 
+ 
  The main.js file can be refactored such that the Controllers are extracted to a separate file for cleanliness.
  The category.html page can similarly be refactored into custom angular directives, possibly with their own
  controllers. 
