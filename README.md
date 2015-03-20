@@ -22,6 +22,8 @@
   python manage.py migrate
   ```
   to initialize the database. 
+  
+  Run with `python manage.py runserver`, open up a browser tab to `http://localhost:8000/bioinformatics` to view.
 
 ## The Server
 
@@ -71,6 +73,8 @@ this.
  dependency between UI events and data manipulation (e.g., via a locally cached transaction queue). 
 
 ## Not Implemented/TODO
+ **Not thoroughly tested outside of Chrome (however, if the dependencies were truthful about their 
+ support, it should work well in anything newer than IE9)**
 
  All of the front end to manipulate Workflows directly is not implemented. My approach would be to factor much of 
  the existing front end components into partials and reuse a lot of the same UI for the workflow CRUD interface. 
