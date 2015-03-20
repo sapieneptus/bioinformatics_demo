@@ -81,11 +81,16 @@ this.
  If I were to scale the application, one place to start making improvements would be in decoupling the REST 
  dependency between UI events and data manipulation (e.g., via a locally cached transaction queue). 
 
-## Not Implemented/TODO
+## Not Implemented/TODO/Known Issues
  **Not thoroughly tested outside of Chrome (however, if the dependencies were truthful about their 
  support, it should work well in anything newer than IE9)** If you are getting erros when trying to use it, 
  try going to `http://localhost:8000/admin` and logging in with superuser credentials in order to refresh
  your browser's CSRF cookie. 
+ 
+ When creating a new category, the `$setPristine()` function appears to not clear the form. This isn't so
+ bad in and of itself, except that whatever workflows appear to be selected don't have an underlying data
+ structure referencing them, so if you click 'create' without toggling the checkboxes then your category's 
+ workflows might not match how it appeared in the dialog. 
 
  All of the front end to manipulate Workflows directly is not implemented. My approach would be to factor much of 
  the existing front end components into partials and reuse a lot of the same UI for the workflow CRUD interface. 
