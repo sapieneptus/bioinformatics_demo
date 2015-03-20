@@ -1,0 +1,56 @@
+{
+	"1": {
+		"id" : "1",
+		"name" : "Quality Control",
+		"description" : "Analysis of short read data with FastQC",
+		"created_on" : "",
+		"last_modified" : "",
+		"categories" : [ 1 ],
+		"num_steps" : 1
+	},
+	"2": {
+		"id" : "2",
+		"name" : "Read Mapping with BWA",
+		"description" : "Align short reads using BWA",
+		"created_on" : "",
+		"last_modified" : "",
+		"categories" : [ 1 ],
+		"num_steps" : 3
+	},
+	"3": {
+		"id" : "3",
+		"name" : "Read Mapping with Bowtie",
+		"description" : "Align short reads using Bowtie",
+		"created_on" : "",
+		"last_modified" : "",
+		"categories" : [ 1 ],
+		"num_steps" : 2
+	},
+	"4": {
+		"id" : "4",
+		"name" : "Quantification with cuffdiff",
+		"description" : "Quantify mRNA levels using duffdiff",
+		"created_on" : "",
+		"last_modified" : "",
+		"categories" : [ 1 ],
+		"num_steps" : 4
+	},
+	"5": {
+		"id" : "5",
+		"name" : "Quantification (RSEM)",
+		"description" : "Measure mRNA levels using RSEM",
+		"created_on" : "",
+		"last_modified" : "",
+		"categories" : [ 1 ],
+		"num_steps" : 3
+	},
+	"6": {
+		"id" : "6",
+		"name" : "Variant calling with GATK",
+		"description" : "Call SNPs and short indels using GATK toolkit.",
+		"created_on" : "",
+		"last_modified" : "",
+		"categories" : [ 1 ],
+		"num_steps" : 3
+	}
+}

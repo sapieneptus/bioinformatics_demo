@@ -1,5 +1,6 @@
-(function(){
+'use strict';
 
+(function(){
 	var app = angular.module('bioinformaticsDemo', 
 		[
 			'ngRoute',
@@ -7,35 +8,25 @@
 			'internet'
 		]);
 
-	var db = { categories : {},
-		workflows : {
-			1 : {
-				"id" : 1,
-				"name" : "WF 1",
-				"description" : "Workflow the first",
-				"created_on" : Date.now(),
-				"last_modified" : Date.now(),
-				"categories" : {1:true},
-				"num_steps" : 3
-			},
-			2 : {
-				"id" : 2,
-				"name" : "WF 2",
-				"description" : "Workflow the second",
-				"created_on" : Date.now(),
-				"last_modified" : Date.now(),
-				"categories" : {1:true, 3:true},
-				"num_steps" : 4
-			}
-		}
-	};
 
-	/*
-	* 	Convenience functions for updating in-memory database
-	*/
-	function dbupsert(id, type, doc) { db[type][id] = doc; }
-	function dbdelete(id, type) 	{ delete db[type][id]; }
-	function dbget(id, type) 		{ return db[type][id]; }
+	app.factory('$db', ['$http', function($http){
+		var db = {
+			categories 	: {},
+			workflows 	: {},
+			/*
+			* 	Convenience functions for updating in-memory database
+			*/
+			dbupsert: 	function(id, type, doc) { db[type][id] = doc; 	},
+			dbdelete: 	function(id, type) 		{ delete db[type][id]; 	},
+			dbget: 	function(id, type) 		{ return db[type][id];	 }
+		};
+		$http.get('/static/workflows.json').success(function(wf){
+			_.extend(db.workflows, wf);
+		}).error(function(data, status, headers, config){
+			console.log(data);
+		});
+		return db;
+	}]);
 
 	app.config(['$routeProvider',
 		function($routeProvider) {
@@ -68,12 +59,12 @@
 
 	});
 
-	app.controller('CategoryController', [ '$scope', '$rest', function($scope, $rest){
+	app.controller('CategoryController', [ '$scope', '$rest', '$db', function($scope, $rest, $db){
 		var self 			= this;
 		$rest.get({
 			url: './category',
 			success: function(cats) {
-				_.each(cats, function(c){ dbupsert(c['id'], 'categories', c); });
+				_.each(cats, function(c){ $db.dbupsert(c['id'], 'categories', c); });
 				self.updateCategories();
 			},
 			error: console.log
@@ -88,11 +79,11 @@
 		self.editing 			= -1;    	/* sentinal val */
 		self.new_cat 			= false;	/* sentinal val */
 		self.edit_buf 			= null;		/* sentinal val */
-		self.workflows 			= db['workflows'];
+		self.workflows 			= $db.workflows;
 
 		self.edit = function(cat_id) {
 			self.editing  = cat_id;
-			self.edit_buf = JSON.parse(JSON.stringify(dbget(cat_id, 'categories'))); /* sloppy deep copy */
+			self.edit_buf = JSON.parse(JSON.stringify($db.dbget(cat_id, 'categories'))); /* sloppy deep copy */
 			$('#collapse-' + cat_id ).collapse('show');
 			$('#edit-cat-' + cat_id).hide();
 		};
@@ -102,13 +93,13 @@
 		* 	but for rapid prototyping it does the job.
 		*/
 		self.delete = function(cat_id) {
-			var name = db['categories'][cat_id].name;
+			var name = $db.categories[cat_id].name;
 			if (confirm("Are you sure you want to delete \"" + name + "\" ?")) {
 				self.editing = -1;
 				$rest.del({
 					url: './category/' + cat_id,
 					success: function(doc) {
-						dbdelete(cat_id, 'categories');
+						$db.dbdelete(cat_id, 'categories');
 						self.updateCategories();
 					}, /* some animation would be nice */
 					error: function(e) {
@@ -127,7 +118,7 @@
 					self.editing = -1;
 					self.showNewCat(false);
 					$scope.newCatForm.$setPristine();
-					db['categories'][doc.id] = doc;
+					$db.categories[doc.id] = doc;
 					self.updateCategories();
 				},
 				error: function(e) {
@@ -140,8 +131,11 @@
 		};
 
 		self.save_edits = function(cat) {
-			console.log("New data", cat);
-			self.upsert(cat);
+			if (cat.name.length == 0) {
+				alert("Must specify a name for the category.");
+			} else {
+				self.upsert(cat);
+			}
 		};
 
 		self.save_new = function(cat_id) {
@@ -151,8 +145,16 @@
 			new_data.created_on 	= Date.now();
 			new_data.last_updated 	= Date.now();
 			new_data.workflows 		= $scope.cat_workflows;
-
+			console.log(new_data.workflows);
 			self.upsert(new_data);
+			$scope.cat_workflows 	= {};
+		};
+		/* handler for checking a checkbox in the new category dialog */
+		self.checked_workflow = function(wf_id) {
+			var val = !!!($scope.cat_workflows[wf_id]);
+			if (val === false) delete $scope.cat_workflows[wf_id];
+			else { $scope.cat_workflows[wf_id] = true; }
+			console.log($scope.cat_workflows);
 		};
 		/* new category dialogue */
 		self.showNewCat = function(show) { self.new_cat = show; };
@@ -161,14 +163,18 @@
 		/* cancel edit mode */
 		self.canceledit = function(cat_id) { 
 			self.editing = -1; 
-			dbupsert(cat_id, 'categories', self.edit_buf); 
+			$db.dbupsert(cat_id, 'categories', self.edit_buf); 
 		};
 		/* convenience method for getting workflows */
-		self.getWorkflow = function(wf_id) { return dbget(wf_id, 'workflows'); }
+		self.getWorkflow = function(wf_id) { return $db.dbget(wf_id, 'workflows'); }
 		/* method to get categories in sorted order by date of creation */
 		self.updateCategories = function() {
-			var cats = _.map(db['categories'], function(cat) { return cat; });
+			var cats = _.map($db.categories, function(cat) { return cat; });
 			self.categories = _.sortBy(cats, function(c) { return - (c.created_on) });
-		}
+		};
+		self.removeWorkflow = function(wf_id, cat) {
+			var index = cat.workflows.indexOf(wf_id);
+			cat.workflows.splice(index, 1);
+		};
 	}]);
 })();
