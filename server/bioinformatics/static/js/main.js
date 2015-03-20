@@ -1,49 +1,12 @@
 (function(){
 
-var csrftoken = $.cookie('csrftoken');
-function csrfSafeMethod(method) {
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
-    }
-});
+	var app = angular.module('bioinformaticsDemo', 
+		[
+			'ngRoute',
+			'internet'
+		]);
 
-var app = angular.module('bioinformaticsDemo', 
-	[
-		'ngRoute'
-	]);
-
-var db = {
-	categories : {
-			1 : {
-				"id" : 1,
-				"name" : "Category 1",
-				"description" : "The First Category",
-				"created_on" : Date.now(),
-				"last_modified" : Date.now(),
-				"workflows" : []
-			},
-			2 : {
-				"id" : 2,
-				"name" : "Category 2",
-				"description" : "The Second Category",
-				"created_on" : Date.now(),
-				"last_modified" : Date.now(),
-				"workflows" : []
-			},
-			3 : {
-				"id" : 3,
-				"name" : "Category 3",
-				"description" : "The Third Category",
-				"created_on" : Date.now(),
-				"last_modified" : Date.now(),
-				"workflows" : []
-			}
-	},
+	var db = { categories : {},
 	workflows : {
 		1 : {
 			"id" : 1,
@@ -51,7 +14,7 @@ var db = {
 			"description" : "Workflow the first",
 			"created_on" : Date.now(),
 			"last_modified" : Date.now(),
-			"categories" : [1],
+			"categories" : {1:true},
 			"num_steps" : 3
 		},
 		2 : {
@@ -60,11 +23,11 @@ var db = {
 			"description" : "Workflow the second",
 			"created_on" : Date.now(),
 			"last_modified" : Date.now(),
-			"categories" : [3],
+			"categories" : {1:true, 3:true},
 			"num_steps" : 4
 		}
 	}
-}
+};
 
 function dbupsert(id, type, doc) { db[type][id] = doc; }
 function dbdelete(id, type) 	{ delete db[type][id]; }
@@ -82,14 +45,14 @@ app.config(['$routeProvider',
 				templateUrl: '/static/partials/workflows.html',
 				controller: 'MainController'
 			}).
-			when('/edit/workflow/:workflow', {
-				templateUrl: '/static/partials/edit-workflow.html',
-				controller: 'MainController'
-			}).
-			when('/edit/category/:category-id', {
-				templateUrl: '/static/partials/edit-category.html',
-				controller: 'MainController'
-			}).
+			// when('/edit/workflow/:workflow', {
+			// 	templateUrl: '/static/partials/edit-workflow.html',
+			// 	controller: 'MainController'
+			// }).
+			// when('/edit/category/:category-id', {
+			// 	templateUrl: '/static/partials/edit-category.html',
+			// 	controller: 'MainController'
+			// }).
 			otherwise({
 				redirectTo: '/categories'
 			});
@@ -108,10 +71,24 @@ app.config(['$routeProvider',
 
 	});
 
-	app.controller('CategoryController', function(){
-		var self = this;
-		self.editing = -1;
-		self.new_cat = false;
+	app.controller('CategoryController', [ '$scope', '$rest', function($scope, $rest){
+		var self 			= this;
+		$rest.get({
+			url: './category',
+			success: function(cats) {
+				_.each(cats, function(c){ $scope.categories[c['id']] = c;});
+				console.log(db);
+			},
+			error: console.log
+		});
+		
+		$scope.categories 	= db['categories'];
+		$scope.workflows 	= db['workflows'];
+		self.editing 		= -1;
+		self.new_cat 		= false;
+		$scope.name 		= "";
+		$scope.description 	= "";
+		$scope.workflows 	= {};
 
 		self.edit = function(cat_id) {
 			self.editing  = cat_id;
@@ -126,15 +103,39 @@ app.config(['$routeProvider',
 		};
 
 		self.save = function(cat_id) {
-			console.log("Save", cat_id);
-			self.editing = -1;
+			var new_data = {};
+			new_data.name 			= $scope.name;
+			new_data.description 	= $scope.description;
+			new_data.created_on 	= Date.now();
+			new_data.last_updated 	= Date.now();
+			new_data.workflows 		= $scope.workflows;
+
+			if (cat_id !== null) {  new_data.id = cat_id; } /* It's new */
+
+			$global.REST.post({
+				url :'./category', 
+				data: new_data, 
+				success: function(r) { 
+					var doc = JSON.parse(r);
+					console.log(doc) ;
+					self.editing = -1;
+					db['categories'][doc.id] = doc;
+				},
+				error: function(e) {
+					console.log(e);
+					//There are a number of things that could go wrong
+					//But the most common reason should be name collision
+					alert("Unable to add category. Is the name unique?");
+				}
+			});
 		};
 
-		self.new_cat = function() {
-			console.log("New cat");
-		}
+		self.showNewCat = function(show) {
+			self.new_cat = show;
+		};
 
-		self.categories = db['categories'];
-		self.workflows = db['workflows'];
-	});
+		self.isediting = function(cat_id) {
+			return self.editing === cat_id;
+		}
+	}]);
 })();

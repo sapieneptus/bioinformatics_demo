@@ -1,5 +1,19 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+import datetime
+
+#
+# 	Some helper functions for date time conversion
+#
+
+def unix_time(dt):
+	naive = dt.replace(tzinfo=None)
+	epoch = datetime.datetime.utcfromtimestamp(0)
+	delta = naive - epoch
+	return delta.total_seconds()
+
+def unix_time_millis(dt):
+	return unix_time(dt) * 1000.0
 
 NAME_LEN = 256
 DESC_LEN = 4096
@@ -22,6 +36,24 @@ class Category(models.Model):
 
 	def __str__(self):
 		return self.name
+
+	def fromJSON(self, j):
+		self.created_on 	= j['created_on']
+		self.description 	= j['description']
+		self.last_updated 	= j['last_updated']
+		self.name 			= j['name']
+		self.workflows 		= j['workflows'].keys()
+
+	def toJSON(self):
+		return {
+			'id': 				self.id,
+			'created_on' : 		unix_time_millis(self.created_on),
+			'description' : 	self.description,
+			'last_updated' : 	unix_time_millis(self.last_updated),
+			'name' : 			self.name,
+			'workflows' : 		self.workflows
+		}
+
 """
 	Workflows have:
 		- a unique name
@@ -42,3 +74,22 @@ class Workflow(models.Model):
 
 	def __str__(self):
 		return self.name
+
+	def fromJSON(self, j):
+		self.created_on 	= j['created_on']
+		self.description 	= j['description']
+		self.last_updated 	= j['last_updated']
+		self.name 			= j['name']
+		self.categories 	= j['categories'].keys()
+		self.num_steps 		= j['num_steps']
+
+	def toJSON(self):
+		return {
+			'id': 				self.id,
+			'created_on' : 		unix_time_millis(self.created_on),
+			'description' : 	self.description,
+			'last_updated' : 	unix_time_millis(self.last_updated),
+			'name' : 			self.name,
+			'categories' : 		self.categories,
+			'num_steps' : 		self.num_steps
+		}
