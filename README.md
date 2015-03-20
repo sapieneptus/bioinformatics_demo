@@ -1,6 +1,4 @@
-# bioinformatics_demo
-Bioinformatics Demo
-
+# Bioinformatics Demo Project
 
 ## Setup
 
