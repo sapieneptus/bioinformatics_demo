@@ -3,6 +3,7 @@
 	var app = angular.module('bioinformaticsDemo', 
 		[
 			'ngRoute',
+			'ngAnimate',
 			'internet'
 		]);
 
@@ -29,6 +30,9 @@
 	}
 };
 
+/*
+* 	Local functions for updating in-memory database
+*/
 function dbupsert(id, type, doc) { db[type][id] = doc; }
 function dbdelete(id, type) 	{ delete db[type][id]; }
 function dbget(id, type) 		{ return db[type][id]; }
@@ -76,8 +80,7 @@ app.config(['$routeProvider',
 		$rest.get({
 			url: './category',
 			success: function(cats) {
-				_.each(cats, function(c){ $scope.categories[c['id']] = c;});
-				console.log(db);
+				_.each(cats, function(c){ dbupsert(c['id'], 'categories', c); });
 			},
 			error: console.log
 		});
@@ -96,10 +99,25 @@ app.config(['$routeProvider',
 			$('#edit-cat-' + cat_id).hide();
 		};
 
+		/*
+		*	I hate 'confirm()' as much as the next guy, 
+		* 	but for rapid prototyping it does the job.
+		*/
 		self.delete = function(cat_id) {
-			self.editing = -1;
-			console.log("Delete", cat_id);
-			dbdelete(cat_id, 'categories');
+			var name = db['categories'][cat_id].name;
+			if (confirm("Are you sure you want to delete \"" + name + "\" ?")) {
+				self.editing = -1;
+				$rest.del({
+					url: './category/' + cat_id,
+					success: function(doc) {
+						dbdelete(cat_id, 'categories');
+					}, /* some animation would be nice */
+					error: function(e) {
+						alert("Unable to delete category. See logs");
+						console.log(e);
+					}
+				});
+			}
 		};
 
 		self.save = function(cat_id) {
@@ -112,13 +130,13 @@ app.config(['$routeProvider',
 
 			if (cat_id !== null) {  new_data.id = cat_id; } /* It's new */
 
-			$global.REST.post({
+			$rest.post({
 				url :'./category', 
 				data: new_data, 
-				success: function(r) { 
-					var doc = JSON.parse(r);
-					console.log(doc) ;
+				success: function(doc) { 
 					self.editing = -1;
+					self.showNewCat(false);
+					$scope.newCatForm.$setPristine();
 					db['categories'][doc.id] = doc;
 				},
 				error: function(e) {

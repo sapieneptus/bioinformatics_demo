@@ -60,15 +60,30 @@ def upsertCategory(categoryData):
 	except Exception as e:
 		return HttpResponse(json.dumps({'error' : str(e)}), status=500)
 
+def fetchCategory(category_id):
+	try:
+		return Category.objects.get(id=category_id)
+	except Exception as notfound:	
+		#Should also check for other possible errors here.
+		#A more robust solution would return a status code
+		#tuple with more info on what went wrong
+		return None
+
 def deleteCategory(category_id):
-	return HttpResponse("delete Category: " + category_id)
+	cat = fetchCategory(category_id)
+	if cat is None:
+		return HttpResponse(json.dumps({'error' : 'not found'}), status=404)
+
+	cpy = cat.toJSON()
+	cat.delete()
+	return HttpResponse(json.dumps(cpy))
 
 def getCategory(category_id):
-	try:
-		cat = Category.objects.get(id=category_id)
-		return HttpResponse(json.dumps(cat.toJSON()))
-	except Exception as notfound:	
+	cat = fetchCategory(category_id)
+	if cat is None:
 		return HttpResponse(json.dumps({'error' : 'not found'}), status=404)
+	else:
+		return HttpResponse(json.dumps(cat.toJSON()))
 
 def allCategories():
 	cats = [cat.toJSON() for cat in Category.objects.all()]
