@@ -53,7 +53,13 @@ def upsertCategory(categoryData):
 			#but if this were a distributed system that might not fly so...
 			del categoryData['id']
 			cat = Category()
+
+		try:
 			cat.fromJSON(categoryData)
+		except Exception as missingfields:
+			return HttpResponse(json.dumps({'error' : 'missing fields', 
+											'body' : categoryData, 
+											'details' : str(missingfields)}), status=500)
 	try:
 		cat.save()		#try to upsert
 		return HttpResponse(json.dumps(cat.toJSON()))

@@ -25,6 +25,10 @@ body {
 	padding: 20px;
 }
 
+.workflow-list {
+	padding: 20px 30px;
+}
+
 .round-border {
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
@@ -59,8 +63,8 @@ hr {
 }
 
 .ng-enter {
-    -webkit-transition: 1s;
-    transition: 1s;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
     opacity: 0;
 }
 
@@ -73,8 +77,8 @@ hr {
 }
 
 .ng-leave {
-	-webkit-transition: 1s;
-    transition: 1s;
+	-webkit-transition: 0.3s;
+    transition: 0.3s;
 }
 
 .new-button {
@@ -90,4 +94,16 @@ hr {
 
 .row.table-header {
 	height: 40px;
+}
+
+.editing {
+	height: 30px;
+}
+
+.hov {
+	cursor: pointer;
+}
+
+.panel-body {
+	padding: 20px 50px;
 }

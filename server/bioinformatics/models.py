@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 import datetime
 
 #
-# 	Some helper functions for date time conversion
+# 	Some utility functions 
 #
 
 def unix_time(dt):
@@ -38,11 +38,13 @@ class Category(models.Model):
 		return self.name
 
 	def fromJSON(self, j):
-		self.created_on 	= j['created_on']
 		self.description 	= j['description']
-		self.last_updated 	= j['last_updated']
 		self.name 			= j['name']
-		self.workflows 		= j['workflows'].keys()
+		wf = j['workflows']
+		if (isinstance(wf, list)):
+			self.workflows = wf
+		else:
+			self.workflows = wf.keys() #dict
 
 	def toJSON(self):
 		return {
@@ -76,12 +78,14 @@ class Workflow(models.Model):
 		return self.name
 
 	def fromJSON(self, j):
-		self.created_on 	= j['created_on']
 		self.description 	= j['description']
-		self.last_updated 	= j['last_updated']
 		self.name 			= j['name']
-		self.categories 	= j['categories'].keys()
+		cats 				= j['categories']
 		self.num_steps 		= j['num_steps']
+		if (isinstance(cats, list)):
+			self.categories = cats
+		else:
+			self.categories = cats.keys() #dict
 
 	def toJSON(self):
 		return {
