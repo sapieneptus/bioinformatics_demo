@@ -23,7 +23,16 @@
   ```
   to initialize the database. 
   
-  Run with `python manage.py runserver`, open up a browser tab to `http://localhost:8000/bioinformatics` to view.
+  Next you'll need to create a superuser, 
+  `python manage.py createsuperuser`
+  
+  Run with `python manage.py runserver`, 
+  Navigate to `http://localhost:8000/admin` and login using the superuser credentials you just made
+  (this is just so that your browser will get the appropriate CSRF cookie, since I didn't have time to 
+  implement automatic cookie fetch as part of the project). 
+  
+  Finally,
+  Open up a browser tab to `http://localhost:8000/bioinformatics` to view.
 
 ## The Server
 
@@ -74,7 +83,9 @@ this.
 
 ## Not Implemented/TODO
  **Not thoroughly tested outside of Chrome (however, if the dependencies were truthful about their 
- support, it should work well in anything newer than IE9)**
+ support, it should work well in anything newer than IE9)** If you are getting erros when trying to use it, 
+ try going to `http://localhost:8000/admin` and logging in with superuser credentials in order to refresh
+ your browser's CSRF cookie. 
 
  All of the front end to manipulate Workflows directly is not implemented. My approach would be to factor much of 
  the existing front end components into partials and reuse a lot of the same UI for the workflow CRUD interface. 
